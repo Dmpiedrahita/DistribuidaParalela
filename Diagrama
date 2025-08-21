@@ -1,0 +1,33 @@
++----------------------+
+| <<interface>>        |
+| SalariosInterface    |
++----------------------+
+| +llenarMatriz(e:int, m:int): void |
+| +totalPorEmpleado(): int[]        |
+| +promedioPorMes(): double[]       |
+| +totalGeneral(): int              |
++-----------------------------------+
+
+           ^ (realiza)
+           |
++---------------------------+
+| SalariosImplement         |
++---------------------------+
+| -matrizSalarios: int[][]  |
+| -empleados: int           |
+| -meses: int               |
++---------------------------+
+| +llenarMatriz(e:int, m:int): void |
+| +totalPorEmpleado(): int[]        |
+| +promedioPorMes(): double[]       |
+| +totalGeneral(): int              |
++-----------------------------------+
+
++-----------+          +-----------+
+| Servidor  |          | Cliente   |
++-----------+          +-----------+
+| +main()   |          | +main()   |
++-----------+          +-----------+
+     |                        |
+     |------uses--------------|
+            SalariosInterface
