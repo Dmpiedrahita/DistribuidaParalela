@@ -10,7 +10,7 @@ CREATE TABLE clientes (
 CREATE TABLE alimentacion (
                               id SERIAL PRIMARY KEY,
                               descripcion VARCHAR(200),
-                              dosis VARCHAR(50)
+                              dosis DECIMAL(10,2)
 );
 
 CREATE TABLE porcinos (
@@ -19,6 +19,6 @@ CREATE TABLE porcinos (
                           raza INT NOT NULL,
                           edad INT,
                           peso DECIMAL(10,2),
-                          cliente_id INT REFERENCES clientes(id),
+                          cliente_id VARCHAR(20) REFERENCES clientes(cedula),
                           alimentacion_id INT REFERENCES alimentacion(id)
 );

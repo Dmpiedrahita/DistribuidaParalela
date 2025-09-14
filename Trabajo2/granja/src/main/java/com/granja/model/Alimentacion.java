@@ -8,4 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class Alimentacion {
+
+    private Integer id;
+    private String descripcion;
+    private Double dosis;
 }

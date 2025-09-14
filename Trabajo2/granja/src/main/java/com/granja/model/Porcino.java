@@ -1,5 +1,6 @@
 package com.granja.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +12,12 @@ public class Porcino {
     private Integer id;
     private String identificacion;
     private Integer raza;
-    private Integer eedad;
+    private Integer edad;
     private Double peso;
-    private Integer clienteId;
+
+    @JsonProperty("cliente_id")
+    private String clienteId;
+
+    @JsonProperty("alimentacion_id")
     private Integer alimentacionId;
 }
