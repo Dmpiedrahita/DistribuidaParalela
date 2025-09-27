@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario Alimentación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4">
+
+<h2 th:text="${alimentacion.id} != null ? 'Editar Alimentación' : 'Nueva Alimentación'"></h2>
+
+<form th:action="@{/alimentaciones/guardar}" th:object="${alimentacion}" method="post" class="row g-3 mb-4">
+    <input type="hidden" th:field="*{id}" />
+
+    <div class="col-md-6">
+        <label>Descripción</label>
+        <input class="form-control" th:field="*{descripcion}" required/>
+    </div>
+    <div class="col-md-3">
+        <label>Dosis</label>
+        <input class="form-control" th:field="*{dosis}" required/>
+    </div>
+    <div class="col-md-12">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <a href="/alimentaciones" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+</body>
+</html>
