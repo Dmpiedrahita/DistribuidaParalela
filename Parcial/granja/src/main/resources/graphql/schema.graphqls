@@ -1,0 +1,75 @@
+type Cliente {
+    id: Int
+    cedula: String
+    nombres: String
+    apellidos: String
+    direccion: String
+    telefono: String
+    porcinos: [Porcino]
+}
+
+type Porcino {
+    id: Int
+    identificacion: String
+    raza: Int
+    edad: Int
+    peso: Float
+    clienteId: String
+    alimentacionId: Int
+}
+
+type Alimentacion {
+    id: Int
+    descripcion: String
+    dosis: Float
+}
+
+type Reporte {
+    cedula: String
+    nombres: String
+    apellidos: String
+    porcinos: [Porcino]
+}
+
+input ClienteInput {
+    id: Int
+    cedula: String
+    nombres: String
+    apellidos: String
+    direccion: String
+    telefono: String
+}
+
+input PorcinoInput {
+    id: Int
+    identificacion: String
+    raza: Int
+    edad: Int
+    peso: Float
+    clienteId: String
+    alimentacionId: Int
+}
+
+input AlimentacionInput {
+    id: Int
+    descripcion: String
+    dosis: Float
+}
+
+type Query {
+    clientes: [Cliente]
+    clientePorCedula(cedula: String!): Cliente
+    porcinos: [Porcino]
+    alimentaciones: [Alimentacion]
+    reporteClientesPorcinos: [Reporte]
+}
+
+type Mutation {
+    guardarCliente(cliente: ClienteInput): Cliente
+    eliminarCliente(cedula: String!): Boolean
+
+    guardarPorcino(porcino: PorcinoInput): Porcino
+    eliminarPorcino(id: Int!): Boolean
+
+    guardarAlimentacion(alimentacion: AlimentacionInput): Alimentacion
+}

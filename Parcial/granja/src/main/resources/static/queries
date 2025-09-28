@@ -1,0 +1,41 @@
+{
+  "query": "query { clientes { id cedula nombres apellidos direccion telefono porcinos { id identificacion raza edad peso } } }"
+}
+
+{
+  "query": "query { clientePorCedula(cedula: \"123456789\") { id cedula nombres apellidos direccion telefono } }"
+}
+
+{
+  "query": "query { porcinos { id identificacion raza edad peso clienteId alimentacionId } }"
+}
+
+{
+  "query": "query { alimentaciones { id descripcion dosis } }"
+}
+
+{
+  "query": "query { reporteClientesPorcinos { cedula nombres apellidos porcinos { id identificacion raza edad peso } } }"
+}
+
+{
+  "query": "mutation { guardarCliente(cliente: { id: 1, cedula: \"123456789\", nombres: \"Juan\", apellidos: \"Pérez\", direccion: \"Calle 123\", telefono: \"5551234\" }) { id cedula nombres apellidos direccion telefono } }"
+}
+
+{
+  "query": "mutation { eliminarCliente(cedula: \"123456789\") }"
+}
+
+{
+  "query": "mutation { guardarPorcino(porcino: { id: 1, identificacion: \"P001\", raza: 2, edad: 5, peso: 120.5, clienteId: \"123456789\", alimentacionId: 1 }) { id identificacion raza edad peso clienteId alimentacionId } }"
+}
+
+{
+  "query": "mutation { eliminarPorcino(id: 1) }"
+}
+
+{
+  "query": "mutation { guardarAlimentacion(alimentacion: { id: 1, descripcion: \"Concentrado Premium\", dosis: 2.5 }) { id descripcion dosis } }"
+}
+
+http://localhost:8080/auth/login?username=admin&password=admin123
