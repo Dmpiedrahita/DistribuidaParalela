@@ -51,169 +51,147 @@
     (Presione "Ver XML")
 </div>
 
+<pre id="xmlViewer" style="background:#eee;padding:10px;white-space:pre-wrap;">
+(Presione "Ver XML")
+</pre>
+
 <script>
     const api = "https://distribuidaparalela.onrender.com/api/productos";
 
-    // ------------------------------------
     // Convertir producto → XML
-    // ------------------------------------
     function productoToXML(prod) {
         return `
-            <producto>
-                ${prod.id ? `<id>${prod.id}</id>` : ""}
-                <nombre>${prod.nombre}</nombre>
-                <descripcion>${prod.descripcion}</descripcion>
-                <categoria>${prod.categoria}</categoria>
-                <valor>${prod.valor}</valor>
-                <stock>${prod.stock}</stock>
-            </producto>
-        `.trim();
+        <producto>
+            ${prod.id ? `<id>${prod.id}</id>` : ""}
+            <nombre>${prod.nombre}</nombre>
+            <descripcion>${prod.descripcion}</descripcion>
+            <categoria>${prod.categoria}</categoria>
+            <valor>${prod.valor}</valor>
+            <stock>${prod.stock}</stock>
+        </producto>
+    `.trim();
     }
 
-    // ------------------------------------
     // Listar productos
-    // ------------------------------------
     async function listar(q="") {
-        let url = api;
-        if(q) url += "?q=" + encodeURIComponent(q);
+        const url = q ? `${api}?q=${encodeURIComponent(q)}` : api;
         const r = await fetch(url, { headers:{ "Accept":"application/json" } });
         const data = await r.json();
-
         const tbody = document.querySelector("#tabla tbody");
         tbody.innerHTML = "";
         data.forEach(p => {
             tbody.innerHTML += `
-                <tr>
-                    <td>${p.id}</td>
-                    <td>${p.nombre}</td>
-                    <td>${p.categoria}</td>
-                    <td>${p.valor}</td>
-                    <td>${p.stock}</td>
-                    <td>
-                        <button onclick="editar(${p.id})">Editar</button>
-                        <button onclick="eliminar(${p.id})">X</button>
-                    </td>
-                </tr>
-            `;
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.nombre}</td>
+                <td>${p.categoria}</td>
+                <td>${p.valor}</td>
+                <td>${p.stock}</td>
+                <td>
+                    <button onclick="editar(${p.id})">Editar</button>
+                    <button onclick="eliminar(${p.id})">X</button>
+                </td>
+            </tr>
+        `;
         });
     }
 
-    // ------------------------------------
-    // Guardar / Editar (POST y PUT en XML)
-    // ------------------------------------
-    document.getElementById("form").addEventListener("submit", async e => {
+    // Guardar / Editar
+    document.getElementById("form")?.addEventListener("submit", async e => {
         e.preventDefault();
         const prod = {
-            id: document.getElementById("id").value || null,
-            nombre: document.getElementById("nombre").value,
-            descripcion: document.getElementById("descripcion").value,
-            categoria: document.getElementById("categoria").value,
-            valor: parseFloat(document.getElementById("valor").value),
-            stock: parseInt(document.getElementById("stock").value)
+            id: document.getElementById("id")?.value || null,
+            nombre: document.getElementById("nombre")?.value,
+            descripcion: document.getElementById("descripcion")?.value,
+            categoria: document.getElementById("categoria")?.value,
+            valor: parseFloat(document.getElementById("valor")?.value),
+            stock: parseInt(document.getElementById("stock")?.value)
         };
         const xmlBody = productoToXML(prod);
         await fetch(prod.id ? `${api}/${prod.id}` : api, {
             method: prod.id ? "PUT" : "POST",
-            headers: {
-                "Content-Type": "application/xml",
-                "Accept": "application/xml"
-            },
+            headers: { "Content-Type": "application/xml", "Accept": "application/xml" },
             body: xmlBody
         });
         e.target.reset();
-        document.getElementById("id").value = "";
+        if(document.getElementById("id")) document.getElementById("id").value = "";
         listar();
     });
 
-    // ------------------------------------
-    // Cargar producto para edición
-    // ------------------------------------
+    // Editar
     async function editar(id) {
         const r = await fetch(`${api}/${id}`, { headers:{ "Accept":"application/xml" } });
         const xml = await r.text();
         const x = new DOMParser().parseFromString(xml, "application/xml");
-        document.getElementById("id").value = x.getElementsByTagName("id")[0].textContent;
-        document.getElementById("nombre").value = x.getElementsByTagName("nombre")[0].textContent;
-        document.getElementById("descripcion").value = x.getElementsByTagName("descripcion")[0].textContent;
-        document.getElementById("categoria").value = x.getElementsByTagName("categoria")[0].textContent;
-        document.getElementById("valor").value = x.getElementsByTagName("valor")[0].textContent;
-        document.getElementById("stock").value = x.getElementsByTagName("stock")[0].textContent;
+
+        ["id","nombre","descripcion","categoria","valor","stock"].forEach(tag => {
+            const el = document.getElementById(tag);
+            const node = x.getElementsByTagName(tag)[0];
+            if(el && node) el.value = node.textContent;
+        });
     }
 
-    // ------------------------------------
     // Eliminar
-    // ------------------------------------
     async function eliminar(id) {
         await fetch(`${api}/${id}`, { method:"DELETE" });
         listar();
     }
 
-    // ------------------------------------
     // Buscar
-    // ------------------------------------
-    document.getElementById("btnBuscar").onclick = () => {
-        listar(document.getElementById("buscar").value);
-    };
+    document.getElementById("btnBuscar")?.addEventListener("click", () => {
+        listar(document.getElementById("buscar")?.value || "");
+    });
 
-    // ------------------------------------
-    // Función para convertir XML → árbol
-    // ------------------------------------
+    // Convertir XML → árbol
     function xmlToTree(xml, container) {
+        if(!container) return;
         container.innerHTML = "";
         function createNode(node){
             let li = document.createElement("li");
             if(node.nodeType === 1){
                 let text = node.nodeName;
                 if(node.attributes.length>0){
-                    let attrs = [];
-                    for(let i=0;i<node.attributes.length;i++){
-                        attrs.push(node.attributes[i].name+'="'+node.attributes[i].value+'"');
-                    }
+                    let attrs = Array.from(node.attributes).map(a => `${a.name}="${a.value}"`);
                     text += " [" + attrs.join(", ") + "]";
                 }
                 li.textContent = text;
-                let children = node.childNodes;
+                const children = node.childNodes;
                 if(children.length>0){
                     let ul = document.createElement("ul");
-                    for(let i=0;i<children.length;i++){
-                        ul.appendChild(createNode(children[i]));
-                    }
+                    for(let i=0;i<children.length;i++) ul.appendChild(createNode(children[i]));
                     li.appendChild(ul);
                 }
             } else if(node.nodeType===3){
-                let t = node.nodeValue.trim();
+                const t = node.nodeValue.trim();
                 if(t) li.textContent += ": "+t;
             }
             return li;
         }
-        let ul = document.createElement("ul");
+        const ul = document.createElement("ul");
         ul.appendChild(createNode(xml.documentElement));
         container.appendChild(ul);
     }
 
-    // ------------------------------------
     // Ver XML
-    // ------------------------------------
-    document.getElementById("btnXml").onclick = async () => {
+    document.getElementById("btnXml")?.addEventListener("click", async () => {
         const r = await fetch(`${api}/reporte/xml`, { headers:{ "Accept":"application/xml" } });
         const xmlText = await r.text();
-        document.getElementById("xmlViewer").textContent = xmlText;
+
+        const xmlViewer = document.getElementById("xmlViewer");
+        if(xmlViewer) xmlViewer.textContent = xmlText;
 
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "application/xml");
 
-        // Árbol
         xmlToTree(xmlDoc, document.getElementById("xmlTree"));
 
-        // Resumen total
         const totalNode = xmlDoc.getElementsByTagName("total_valor")[0];
-        document.getElementById("resumen").innerHTML = `<b>Total de productos:</b> ${totalNode ? totalNode.textContent : '0'}`;
-    };
+        const resumen = document.getElementById("resumen");
+        if(resumen) resumen.innerHTML = `<b>Total de productos:</b> ${totalNode ? totalNode.textContent : '0'}`;
+    });
 
-    // ------------------------------------
     // Descargar XML
-    // ------------------------------------
-    document.getElementById("btnDescargar").onclick = async () => {
+    document.getElementById("btnDescargar")?.addEventListener("click", async () => {
         const r = await fetch(`${api}/reporte/xml`);
         const xmlText = await r.text();
         const blob = new Blob([xmlText], { type:"application/xml" });
@@ -223,7 +201,7 @@
         a.download = "reporte_productos.xml";
         a.click();
         URL.revokeObjectURL(url);
-    };
+    });
 
     listar();
 </script>
