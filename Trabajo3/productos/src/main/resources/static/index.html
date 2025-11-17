@@ -158,31 +158,69 @@
         listar(document.getElementById("buscar").value);
     };
 
-    // ------------------------------------
-    // Ver XML del reporte
-    // ------------------------------------
-    document.getElementById("btnXml").onclick = async () => {
-        const r = await fetch(`${api}/reporte/xml`, {
-            headers: { "Accept":"application/xml" }
-        });
-        const xml = await r.text();
-        document.getElementById("xmlViewer").textContent = xml;
+    // 🔹 XML → mostrar árbol
+    function xmlToTree(xml, container) {
+        container.innerHTML = "";
+        function createNode(node){
+            let li = document.createElement("li");
+            if(node.nodeType === 1){
+                let text = node.nodeName;
+                if(node.attributes.length>0){
+                    let attrs = [];
+                    for(let i=0;i<node.attributes.length;i++){
+                        attrs.push(node.attributes[i].name+'="'+node.attributes[i].value+'"');
+                    }
+                    text += " [" + attrs.join(", ") + "]";
+                }
+                li.textContent = text;
+                let children = node.childNodes;
+                if(children.length>0){
+                    let ul = document.createElement("ul");
+                    for(let i=0;i<children.length;i++){
+                        ul.appendChild(createNode(children[i]));
+                    }
+                    li.appendChild(ul);
+                }
+            } else if(node.nodeType===3){
+                let t = node.nodeValue.trim();
+                if(t) li.textContent += ": "+t;
+            }
+            return li;
+        }
+        let ul = document.createElement("ul");
+        ul.appendChild(createNode(xml.documentElement));
+        container.appendChild(ul);
+    }
+
+    // 🔹 Botón ver XML
+    document.getElementById("btnVerXml").onclick = async () => {
+        const r = await fetch(api+'/reporte/xml', { headers: {"Accept": "application/xml"} });
+        const xmlText = await r.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "application/xml");
+
+        // Árbol
+        const container = document.getElementById("xmlTree");
+        xmlToTree(xmlDoc, container);
+
+        // Resumen
+        const total = xmlDoc.getElementsByTagName("total_valor")[0].textContent;
+        document.getElementById("resumen").innerHTML = `<b>Total de productos:</b> ${total}`;
     };
 
-    // ------------------------------------
-    // Descargar XML
-    // ------------------------------------
-    document.getElementById("btnDescargar").onclick = async () => {
-        const r = await fetch(`${api}/reporte/xml`);
-        const xml = await r.text();
-
-        const blob = new Blob([xml], { type: "application/xml" });
+    // 🔹 Botón descargar XML
+    document.getElementById("btnDownloadXml").onclick = async () => {
+        const r = await fetch(api+'/reporte/xml', { headers: {"Accept": "application/xml"} });
+        const xmlText = await r.text();
+        const blob = new Blob([xmlText], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
-
         const a = document.createElement("a");
         a.href = url;
-        a.download = "reporte_productos.xml";
+        a.download = "productos.xml";
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     listar();
